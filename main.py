@@ -1,15 +1,21 @@
+# Импортируем tensorflow с псевдонимом tf, начинаем сессию работы с tensorflow.
 import tensorflow as tf
 sess = tf.InteractiveSession()
 
+# Импортируем модуль input_data, с помощью которого далее берем данные mnist, с условием что все подписи (т.е. цифры) будут представлены в виде one hot векторов.
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
+# Значение которое мы будем называть входным, float32 - тип чисел, [None, 784] - двумерный тензор с плавающей точкой 28*28=784, None - количество может быть
+# любое. y_ - это очевидно выходы.
 x = tf.placeholder(tf.float32, shape=[None, 784])
-y_ = tf.placeholder(tf.float32, shape=[None, 10])
+#y_ = tf.placeholder(tf.float32, shape=[None, 10])
 
+# Это как я понимаю изменяемый тензор, который мы создаем для матрицы весов и вектора смещения, заполняем нулями.
 W = tf.Variable(tf.zeros([784,10]))
 b = tf.Variable(tf.zeros([10]))
 
+#
 sess.run(tf.global_variables_initializer())
 y = tf.matmul(x,W) + b
 cross_entropy = tf.reduce_mean(
@@ -72,7 +78,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
-  for i in range(20000):
+  for i in range(10000):
     batch = mnist.train.next_batch(50)
     if i % 100 == 0:
       train_accuracy = accuracy.eval(feed_dict={
@@ -80,6 +86,4 @@ with tf.Session() as sess:
       print('step %d, training accuracy %g' % (i, train_accuracy))
     train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
 
-  print('test accuracy %g' % accuracy.eval(feed_dict={
-      x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
-
+  print(sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
